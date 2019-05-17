@@ -1,0 +1,106 @@
+-- ¹1
+SELECT lr."name"
+FROM public."Teathers" t JOIN public."Lectures" l ON t.id = l.teather_id
+	JOIN public."Schedules" s ON s.lecture_id = l.id
+	JOIN public."LectureRooms" lr ON s.lecture_room_id = lr.id
+WHERE t."name" like 'Edward' AND t.surname like 'Hopper'
+;
+
+-- ¹2
+SELECT t.surname
+FROM  public."Groups" g JOIN public."GroupsLectures" gl ON gl.group_id = g.id
+	JOIN public."Lectures" l ON l.id = gl.lecture_id
+	JOIN public."Teathers" t ON t.id = l.teather_id
+	JOIN public."Assistants" ON "Assistants".teacher_id = t.id
+WHERE g."name" like 'F505'
+;
+
+-- ¹3
+SELECT distinct s."name"
+FROM public."Subjects" s JOIN public."Lectures" l ON l.subject_id = s.id
+	JOIN public."Teathers" t ON t.id = l.teather_id
+	JOIN public."GroupsLectures" gl ON gl.lecture_id = l.id
+	JOIN public."Groups" g ON g.id = gl.group_id
+WHERE g."year" = 5 AND t."name" = 'Alex' AND t.surname = 'Carmack'
+;
+
+-- ¹4
+SELECT *
+FROM public."Schedules" sc FULL JOIN public."Lectures" l ON l.id = sc.lecture_id
+	FULL JOIN  public."Teathers" t ON t.id = l.teather_id
+WHERE t.id NOT IN (SELECT t.id
+				  FROM public."Schedules" sc 
+				   	   JOIN public."Lectures" l ON l.id = sc.lecture_id
+				  	   JOIN  public."Teathers" t ON t.id = l.teather_id
+				  WHERE sc.day_of_week = 1)
+;
+
+-- ¹5
+SELECT distinct lr."name"
+FROM public."LectureRooms" lr 
+	FULL JOIN public."Schedules" sc ON sc.lecture_room_id = lr.id
+	FULL JOIN public."Lectures" l ON l.id = sc.lecture_id
+WHERE lr.id NOT IN (SELECT lr.id
+					FROM public."LectureRooms" lr 
+					JOIN public."Schedules" sc ON sc.lecture_room_id = lr.id
+					JOIN public."Lectures" l ON l.id = sc.lecture_id
+					WHERE sc.day_of_week = 3 AND sc.week = 2 AND sc."class" = 3)
+;
+
+-- ¹6
+SELECT distinct t."name" || ' ' || t.surname AS "Teather name"
+FROM public."Faculties" f FULL JOIN public."Departments" d ON d.faculty_id = f.id
+	FULL JOIN public."Groups" g ON g.department_id = d.id
+	FULL JOIN public."GroupsCurators" gc ON gc.group_id = g.id
+	FULL JOIN public."Curators" c ON c.id = gc.curator_id
+	FULL JOIN public."Teathers" t ON t.id = c.teacher_id
+WHERE t.id NOT IN (SELECT t.id
+					FROM public."Faculties" f 
+				   	JOIN public."Departments" d ON d.faculty_id = f.id
+					JOIN public."Groups" g ON g.department_id = d.id
+					JOIN public."GroupsCurators" gc ON gc.group_id = g.id
+					JOIN public."Curators" c ON c.id = gc.curator_id
+					JOIN public."Teathers" t ON t.id = c.teacher_id
+					WHERE f."name" like 'Computer Science' 
+				   AND d."name" LIKE 'Sofware Development')
+;
+
+-- ¹7
+SELECT f.building AS "Buildings number"
+FROM public."Faculties" f
+UNION
+SELECT d.building
+FROM public."Departments" d
+UNION
+SELECT lr.building
+FROM public."LectureRooms" lr
+ORDER BY "Buildings number"
+;
+
+-- ¹8
+SELECT distinct t."name" || ' ' || t.surname AS "Full Name"
+FROM public."Deans" d, public."Teathers" t
+WHERE d.teacher_id = t.id
+UNION all
+SELECT distinct t2."name" || ' ' || t2.surname
+FROM public."Heads" h, public."Teathers" t2
+WHERE h.teather_id = t2.id
+UNION all
+SELECT distinct t1."name" || ' ' || t1.surname
+FROM public."Teathers" t1
+UNION all
+SELECT distinct t3."name" || ' ' || t3.surname
+FROM public."Curators" c, public."Teathers" t3
+WHERE t3.id = c.teacher_id
+UNION all
+SELECT distinct t4."name" || ' ' || t4.surname
+FROM public."Assistants" a, public."Teathers" t4
+WHERE a.teacher_id = t4.id
+;
+
+-- ¹9
+SELECT distinct sc.day_of_week
+FROM public."LectureRooms" lr 
+	JOIN public."Schedules" sc ON sc.lecture_room_id = lr.id
+WHERE lr."name" LIKE 'A311' or lr."name" LIKE 'A104' AND lr.building = 6	
+;
